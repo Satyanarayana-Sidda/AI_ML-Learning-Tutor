@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Magenta/Plum Light Theme based on screenshot */
+    --color-base: #FCFAFB;
+    --color-base-panel: #FFFFFF;
+    --color-base-raised: #F7F3F5;
+    
+    --color-accent-orange: #8B1972; /* Deep Magenta/Plum (Primary) */
+    --color-accent-peach: #FCE7F2;  /* Soft Pink/Magenta (Active states) */
+    --color-accent-brown: #550D45;  /* Darker Plum */
+    --color-accent-blue: #D81B60;   /* Vibrant Pink (Replaces Blue in Light Theme) */
+    
+    --color-text-primary: #1C1C28;
+    --color-text-muted: #6B7280;
+    --color-text-faint: #9CA3AF;
+    
+    --color-border-glass: #F2E9EC;
+    
+    --shadow-glass: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  html.dark {
+    /* Sleek Professional Dark Theme (Midnight/Ocean) */
+    --color-base: #0B0F19;       /* Very Deep Navy/Slate */
+    --color-base-panel: #111827; /* Dark Gray/Blue */
+    --color-base-raised: #1F2937;/* Lighter Gray/Blue */
+    
+    --color-accent-orange: #3B82F6; /* Trustworthy Ocean Blue */
+    --color-accent-peach: rgba(59, 130, 246, 0.1); /* Very subtle blue tint */
+    --color-accent-brown: #60A5FA;  /* Lighter Blue */
+    --color-accent-blue: #2563EB;   /* Deep Blue */
+    
+    --color-text-primary: #F9FAFB;  /* Off-White */
+    --color-text-muted: #9CA3AF;    /* Muted Gray */
+    --color-text-faint: #4B5563;    /* Faint Gray */
+    
+    --color-border-glass: rgba(255, 255, 255, 0.08);
+    
+    --shadow-glass: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    background-color: var(--color-base);
+    color: var(--color-text-primary);
+  }
+  ::selection {
+    background: rgba(217, 119, 87, 0.2);
+  }
+  html.dark ::selection {
+    background: rgba(59, 130, 246, 0.3);
+  }
+  /* Visible focus rings everywhere — accessibility floor, not optional */
+  :focus-visible {
+    outline: 2px solid var(--color-accent-orange);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-base-panel border border-border-glass rounded-xl2 shadow-glass;
+  }
+  .glass-card {
+    @apply bg-base-panel border border-border-glass rounded-xl transition-colors;
+  }
+  .btn-primary {
+    @apply bg-accent-orange text-white font-medium px-5 py-2.5 rounded-lg shadow-sm
+           hover:brightness-110 active:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply bg-transparent border border-border-glass text-text-primary px-5 py-2.5 rounded-lg
+           hover:bg-base-raised transition-colors;
+  }
+  .input-field {
+    @apply w-full bg-white border border-border-glass rounded-lg px-4 py-2.5
+           text-text-primary placeholder:text-text-faint focus:border-accent-orange outline-none transition-colors shadow-sm;
+  }
+  .gradient-text {
+    @apply text-accent-orange;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-glass);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-faint);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border-glass);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-faint);
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+@layer utilities {
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}
