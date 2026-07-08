@@ -12,6 +12,11 @@ import { SYLLABUS_DATA, Chapter } from "./moduleSyllabus";
 import { getOfflineChapterContent, getOfflineFlashcards } from "./staticContent";
 import FlashcardDeck from "./FlashcardDeck";
 import { useAuthStore } from "@/stores/authStore";
+import { LRUCache } from "@/lib/lruCache";
+
+// Global cache for flashcards to persist across component mounts
+// Holds max 5 recent chapter flashcard decks
+const flashcardCache = new LRUCache<string, { question: string, answer: string }[]>(5);
 
 export default function ModuleViewerPage() {
   const { moduleId } = useParams();
@@ -104,10 +109,22 @@ export default function ModuleViewerPage() {
     if (isGeneratingFlashcards || !activeChapter || !content || !moduleData) return;
     setIsGeneratingFlashcards(true);
     try {
-      // Simulate a small AI thinking delay for UX
-      await new Promise(r => setTimeout(r, 600));
-      const offlineCards = getOfflineFlashcards(activeChapter.title, moduleData.title);
-      setFlashcards(offlineCards);
+      const cacheKey = `${moduleData.id}-${activeChapter.id}`;
+      const cachedCards = flashcardCache.get(cacheKey);
+
+      if (cachedCards) {
+        // O(1) instant return from LRU Cache
+        setFlashcards(cachedCards);
+      } else {
+        // Simulate a small AI thinking delay for UX
+        await new Promise(r => setTimeout(r, 600));
+        const offlineCards = getOfflineFlashcards(activeChapter.title, moduleData.title);
+        
+        // Save to LRU Cache
+        flashcardCache.put(cacheKey, offlineCards);
+        setFlashcards(offlineCards);
+      }
+      
       setShowFlashcardsModal(true);
     } catch (err) {
       console.error("Failed to generate flashcards", err);

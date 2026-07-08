@@ -13,6 +13,25 @@ export interface ModuleSyllabus {
 }
 
 export const SYLLABUS_DATA: Record<string, ModuleSyllabus> = {
+  dsa: {
+    id: "dsa",
+    title: "Data Structures & Algorithms",
+    icon: "Network",
+    color: "from-accent-orange to-accent-peach",
+    chapters: [
+      { id: "dsa-1", title: "Introduction to Big-O Notation", level: "Basic" },
+      { id: "dsa-2", title: "Arrays & Strings", level: "Basic" },
+      { id: "dsa-3", title: "Linked Lists", level: "Basic" },
+      { id: "dsa-4", title: "Stacks & Queues", level: "Basic" },
+      { id: "dsa-5", title: "Hash Tables & Hash Maps", level: "Intermediate" },
+      { id: "dsa-6", title: "Trees (Binary, BST, AVL)", level: "Intermediate" },
+      { id: "dsa-7", title: "Heaps & Priority Queues", level: "Intermediate" },
+      { id: "dsa-8", title: "Graphs (BFS, DFS)", level: "Advanced" },
+      { id: "dsa-9", title: "Advanced Graph Algorithms (Dijkstra, A*)", level: "Advanced" },
+      { id: "dsa-10", title: "Dynamic Programming (Memoization)", level: "Advanced" },
+      { id: "dsa-11", title: "Tries & Prefix Trees", level: "Advanced" },
+    ]
+  },
   ml: {
     id: "ml",
     title: "Machine Learning Foundations",

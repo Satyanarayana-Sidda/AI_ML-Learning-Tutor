@@ -1,11 +1,13 @@
-import { Play, Code2, BrainCircuit, Network, MessageSquare, Eye, Database, Sparkles, LineChart, HeartHandshake, FileText, Mic, Cpu, ThumbsUp, Smartphone, Terminal, Calculator, PieChart, BarChart, Server, Shield, Heart, TrendingUp, Cloud, Zap, Target, Atom } from "lucide-react";
+import { Play, Code2, BrainCircuit, Network, MessageSquare, Eye, Database, Sparkles, LineChart, HeartHandshake, FileText, Mic, Cpu, ThumbsUp, Smartphone, Terminal, Calculator, PieChart, BarChart, Server, Shield, Heart, TrendingUp, Cloud, Zap, Target, Atom, Search } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/authStore";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { CourseTrie } from "@/lib/trie";
 
 const STATIC_COURSES = [
+  { id: "dsa", title: "Data Structures & Algorithms", level: "Beginner", lessons: 15, progress: 0, icon: "Network", color: "from-accent-orange to-accent-peach", category: "Computer Science" },
   { id: "ml", title: "Machine Learning Foundations", level: "Beginner", lessons: 24, progress: 75, icon: "BrainCircuit", color: "from-accent-orange to-accent-peach", category: "Foundations" },
   { id: "dl", title: "Deep Learning with PyTorch", level: "Intermediate", lessons: 32, progress: 40, icon: "Network", color: "from-accent-blue to-accent-peach", category: "Deep Learning" },
   { id: "nlp", title: "NLP & Large Language Models", level: "Advanced", lessons: 28, progress: 20, icon: "MessageSquare", color: "from-accent-orange to-accent-brown", category: "NLP" },
@@ -39,11 +41,12 @@ const STATIC_COURSES = [
 ];
 
 const ICON_MAP: Record<string, any> = { Code2, BrainCircuit, Network, MessageSquare, Eye, Database, Sparkles, LineChart, HeartHandshake, FileText, Mic, Cpu, ThumbsUp, Smartphone, Terminal, Calculator, PieChart, BarChart, Server, Shield, Heart, TrendingUp, Cloud, Zap, Target, Atom };
-const TAGS = ['All', 'Foundations', 'Deep Learning', 'NLP', 'Computer Vision', 'Applied AI'];
+const TAGS = ['All', 'Computer Science', 'Foundations', 'Deep Learning', 'NLP', 'Computer Vision', 'Applied AI'];
 
 export default function CoursesPage() {
   const navigate = useNavigate();
   const [activeTag, setActiveTag] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const { data: apiCourses, refetch } = useQuery({
     queryKey: ['courses'],
     queryFn: async () => (await api.get('/courses')).data
@@ -75,9 +78,30 @@ export default function CoursesPage() {
     progress: savedProgress[c.id] !== undefined ? savedProgress[c.id] : c.progress
   }));
 
-  const filteredCourses = activeTag === 'All' 
-    ? courses 
-    : courses.filter((c: any) => c.category === activeTag);
+  // 1. Build the Trie
+  const trie = useMemo(() => {
+    const t = new CourseTrie();
+    courses.forEach((c: any) => t.insert(c.id, c.title));
+    return t;
+  }, [courses]);
+
+  // 2. Filter using Trie if searching, else use Tag
+  const filteredCourses = useMemo(() => {
+    let result = courses;
+    
+    // O(L) fast search via Trie
+    if (searchQuery.trim().length > 0) {
+      const matchedIds = trie.searchPrefix(searchQuery);
+      result = result.filter((c: any) => matchedIds.has(c.id));
+    }
+    
+    // Apply tag filter
+    if (activeTag !== 'All') {
+      result = result.filter((c: any) => c.category === activeTag);
+    }
+    
+    return result;
+  }, [courses, activeTag, searchQuery, trie]);
 
   return (
     <div className="p-8 max-w-7xl mx-auto pb-24">
@@ -86,16 +110,28 @@ export default function CoursesPage() {
           <h1 className="font-display text-3xl font-semibold">All Modules</h1>
           <p className="text-text-muted mt-1">Choose a path and start learning AI/ML.</p>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          {TAGS.map((tag) => (
-            <button 
-              key={tag} 
-              onClick={() => setActiveTag(tag)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${activeTag === tag ? 'bg-accent-orange text-white shadow-sm' : 'glass-card hover:bg-base-raised text-text-muted hover:text-text-primary'}`}
-            >
-              {tag}
-            </button>
-          ))}
+        <div className="flex flex-col items-end gap-4">
+          <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
+            <input 
+              type="text" 
+              placeholder="Search via Trie..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-base-raised border border-border-glass rounded-lg pl-9 pr-4 py-2 text-sm focus:border-accent-orange outline-none transition-colors"
+            />
+          </div>
+          <div className="flex gap-2 flex-wrap justify-end">
+            {TAGS.map((tag) => (
+              <button 
+                key={tag} 
+                onClick={() => setActiveTag(tag)}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${activeTag === tag ? 'bg-accent-orange text-white shadow-sm' : 'glass-card hover:bg-base-raised text-text-muted hover:text-text-primary'}`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 

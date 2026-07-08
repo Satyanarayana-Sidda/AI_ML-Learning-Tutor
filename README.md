@@ -21,6 +21,17 @@ See [`docs/PHASE_1_ARCHITECTURE.md`](docs/PHASE_1_ARCHITECTURE.md) for the full 
 - 🎤 **Interview Prep** — Simulated technical interviews with the AI tutor for real-world practice.
 - 💡 **Project Ideas Generator** — Brainstorm unique, level-appropriate portfolio projects with AI guidance.
 
+## 🌳 Custom Data Structures (Performance Optimizations)
+
+To ensure high performance and scalability, this project avoids basic array methods and implements custom Data Structures from scratch:
+
+1. **Trie (Prefix Tree) — $O(L)$ Search Complexity**
+   - **File:** `frontend/src/lib/trie.ts`
+   - **Usage:** Powers the lightning-fast autocomplete course search engine. By traversing shared character prefixes, the UI can instantly query thousands of courses in $O(L)$ time (where $L$ is the length of the search term) instead of traditional $O(N \times M)$ array filtering.
+2. **LRU Cache (Hash Map + Doubly Linked List) — $O(1)$ Caching**
+   - **File:** `frontend/src/lib/lruCache.ts`
+   - **Usage:** Intercepts and caches heavy AI generation requests (like Flashcards). The **Hash Map** provides $O(1)$ constant time data retrieval, while the **Doubly Linked List** strictly tracks access history, instantly unlinking the oldest (Least Recently Used) cache node in $O(1)$ time to prevent browser memory leaks.
+
 ## Quick start
 
 ### 1. Infrastructure (Postgres + Redis)
