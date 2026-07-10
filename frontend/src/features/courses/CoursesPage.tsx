@@ -104,8 +104,8 @@ export default function CoursesPage() {
   }, [courses, activeTag, searchQuery, trie]);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto pb-24">
-      <header className="mb-8 flex items-center justify-between">
+    <div className="p-8 max-w-7xl mx-auto pb-24 relative">
+      <header className="sticky top-0 z-20 bg-base/80 backdrop-blur-xl py-4 -my-4 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-transparent transition-all">
         <div>
           <h1 className="font-display text-3xl font-semibold">All Modules</h1>
           <p className="text-text-muted mt-1">Choose a path and start learning AI/ML.</p>

@@ -66,7 +66,7 @@ export default function TutorChat({ inline = false }: { inline?: boolean }) {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
   const historyQuery = useQuery({
@@ -116,7 +116,9 @@ export default function TutorChat({ inline = false }: { inline?: boolean }) {
   };
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   async function ensureConversation(): Promise<string> {
@@ -159,10 +161,9 @@ export default function TutorChat({ inline = false }: { inline?: boolean }) {
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, startPosX: 0, startPosY: 0, isDragging: false });
 
-  // If floating mode and we are on dashboard, hide it completely.
-  if (!inline && location.pathname === "/dashboard") {
-    return null;
-  }
+  // Instead of unmounting the component on the dashboard, we hide it with CSS
+  // so we don't lose the local chat state (messages, input) when navigating.
+  const isHidden = !inline && location.pathname === "/dashboard";
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (e.button !== 0) return; // Only left click
@@ -195,10 +196,12 @@ export default function TutorChat({ inline = false }: { inline?: boolean }) {
     if (e.currentTarget.hasPointerCapture(e.pointerId)) {
       e.currentTarget.releasePointerCapture(e.pointerId);
     }
+    setIsDragging(false);
+    // We use a longer timeout (100ms) so that the subsequent 'click' event 
+    // can read isDragging=true and cancel itself.
     setTimeout(() => {
-      setIsDragging(false);
       dragRef.current.isDragging = false;
-    }, 0);
+    }, 100);
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -264,7 +267,10 @@ export default function TutorChat({ inline = false }: { inline?: boolean }) {
         </div>
       ) : (
         <>
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-base">
+          <div 
+            ref={scrollContainerRef}
+            className="flex-1 min-h-0 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-base"
+          >
             {messages.length === 0 && (
               <div className="text-center mt-10">
                 <p className="text-text-muted text-sm">Ask anything about ML, DL, Python, NLP, or LLMs.</p>
@@ -275,7 +281,6 @@ export default function TutorChat({ inline = false }: { inline?: boolean }) {
                 <MessageItem key={m.id} m={m} />
               ))}
             </div>
-            <div ref={bottomRef} />
           </div>
 
           <div className="p-4 border-t border-border-glass bg-base-panel">
@@ -307,7 +312,7 @@ export default function TutorChat({ inline = false }: { inline?: boolean }) {
   }
 
   return (
-    <>
+    <div style={{ display: isHidden ? 'none' : 'block' }}>
       <button 
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -325,6 +330,6 @@ export default function TutorChat({ inline = false }: { inline?: boolean }) {
           {chatUI}
         </div>
       )}
-    </>
+    </div>
   );
 }
