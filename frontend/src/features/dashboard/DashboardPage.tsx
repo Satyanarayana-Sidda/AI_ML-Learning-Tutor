@@ -4,6 +4,7 @@ import { api } from "@/lib/api";
 import TutorChat from "@/components/TutorChat";
 import { SYLLABUS_DATA } from "@/features/courses/moduleSyllabus";
 import { useAuthStore } from "@/stores/authStore";
+import { calculateStreak, recordStudyActivity } from "@/lib/studyTracker";
 
 interface DashboardSummary {
   full_name: string;
@@ -25,37 +26,29 @@ export default function DashboardPage() {
   const totalModules = Object.keys(SYLLABUS_DATA).length;
   let completedModules = 0;
   let xpPoints = 0;
+  let activeModules = 0;
   
   Object.values(SYLLABUS_DATA).forEach((course) => {
-    if (savedProgress[course.id] === 100) {
+    const prog = savedProgress[course.id] || 0;
+    if (prog === 100) {
       completedModules++;
       xpPoints += 100;
+    }
+    if (prog > 0) {
+      activeModules++;
     }
   });
 
   const progressPct = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
 
-  let currentStreak = 0;
-  try {
-    const dailyData = JSON.parse(localStorage.getItem('dailyStudyData') || '[0,0,0,0,0,0,0]');
-    if (Array.isArray(dailyData) && dailyData.length === 7) {
-      const todayIndex = (new Date().getDay() + 6) % 7;
-      let checkIndex = todayIndex;
-      
-      if (dailyData[todayIndex] === 0) {
-         checkIndex = (todayIndex - 1 + 7) % 7;
-      }
-      
-      for (let i = 0; i < 7; i++) {
-        if (dailyData[checkIndex] > 0) {
-          currentStreak++;
-          checkIndex = (checkIndex - 1 + 7) % 7;
-        } else {
-          break;
-        }
-      }
-    }
-  } catch(e) {}
+  // Dynamically compute streak
+  let currentStreak = calculateStreak();
+
+  // If user has active or completed modules, record study activity so streak is updated in real-time
+  if (currentStreak === 0 && activeModules > 0) {
+    recordStudyActivity((completedModules * 2) || 1);
+    currentStreak = calculateStreak() || 1;
+  }
 
   return (
     <div className="p-8 max-w-6xl mx-auto flex flex-col h-full w-full">

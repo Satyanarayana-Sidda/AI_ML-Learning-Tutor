@@ -13,6 +13,7 @@ import { getOfflineChapterContent, getOfflineFlashcards } from "./staticContent"
 import FlashcardDeck from "./FlashcardDeck";
 import { useAuthStore } from "@/stores/authStore";
 import { LRUCache } from "@/lib/lruCache";
+import { recordStudyActivity } from "@/lib/studyTracker";
 
 // Global cache for flashcards to persist across component mounts
 // Holds max 5 recent chapter flashcard decks
@@ -50,6 +51,7 @@ export default function ModuleViewerPage() {
     if (completedCount > 0) {
       const progressPct = Math.round((completedCount / moduleData.chapters.length) * 100);
       setCourseProgress(moduleData.id, progressPct);
+      recordStudyActivity(completedCount);
     }
   }, [chapterContents, moduleData, setCourseProgress]);
 
