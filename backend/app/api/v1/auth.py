@@ -7,9 +7,11 @@ from app.schemas.auth import (
     GoogleLoginRequest,
     LoginRequest,
     RefreshRequest,
+    ResetPasswordRequest,
     SignupRequest,
     TokenResponse,
     UserOut,
+    VerifyOTPRequest,
 )
 from app.services.auth_service import AuthService
 
@@ -43,12 +45,20 @@ async def refresh(body: RefreshRequest, auth_service: AuthService = Depends(get_
     return {"access_token": access, "token_type": "bearer"}
 
 
-@router.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED)
-async def forgot_password(body: ForgotPasswordRequest):
-    # Intentionally always returns 202 regardless of whether the email exists —
-    # prevents user enumeration. Actual email dispatch (via e.g. Resend/SendGrid)
-    # is queued to a background worker in Phase 6 (deployment/integration).
-    return {"message": "If that email exists, a reset link has been sent."}
+@router.post("/forgot-password")
+async def forgot_password(body: ForgotPasswordRequest, auth_service: AuthService = Depends(get_auth_service)):
+    return await auth_service.request_password_reset_otp(body.email)
+
+
+@router.post("/verify-otp")
+async def verify_otp(body: VerifyOTPRequest, auth_service: AuthService = Depends(get_auth_service)):
+    await auth_service.verify_otp(body.email, body.otp)
+    return {"status": "success", "message": "OTP verified successfully!"}
+
+
+@router.post("/reset-password")
+async def reset_password(body: ResetPasswordRequest, auth_service: AuthService = Depends(get_auth_service)):
+    return await auth_service.reset_password_with_otp(body.email, body.otp, body.new_password)
 
 
 @router.get("/me", response_model=UserOut)

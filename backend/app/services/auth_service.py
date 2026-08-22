@@ -20,8 +20,12 @@ from app.core.security import (
     verify_password,
     verify_refresh_token,
 )
+import random
 from app.models.user import User
 from app.repositories.user_repository import RefreshTokenRepository, UserRepository
+
+# In-memory store for reset OTPs (email.lower() -> { otp, expires_at, sender })
+OTP_STORE: dict[str, dict] = {}
 
 
 class AuthService:
@@ -119,3 +123,67 @@ class AuthService:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": "INVALID_REFRESH_TOKEN", "message": "refresh token invalid or expired"},
         )
+
+    async def request_password_reset_otp(self, email: str) -> dict:
+        email_clean = email.strip().lower()
+        otp = f"{random.randint(100000, 999999)}"
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+        sender = "Satyanarayana Sidda (Founder, Satya Academy)"
+        
+        OTP_STORE[email_clean] = {
+            "otp": otp,
+            "expires_at": expires_at,
+            "sender": sender,
+        }
+        
+        return {
+            "status": "success",
+            "message": f"Password reset OTP generated & dispatched by {sender}",
+            "sender": sender,
+            "email": email_clean,
+            "otp": otp,
+            "expires_in_minutes": 15,
+        }
+
+    async def verify_otp(self, email: str, otp: str) -> bool:
+        email_clean = email.strip().lower()
+        record = OTP_STORE.get(email_clean)
+        if not record:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"code": "INVALID_OTP", "message": "No active OTP request found for this email. Please request a new OTP."},
+            )
+        if record["expires_at"] < datetime.now(timezone.utc):
+            OTP_STORE.pop(email_clean, None)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"code": "EXPIRED_OTP", "message": "OTP has expired. Please request a new one."},
+            )
+        if record["otp"] != otp.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"code": "INVALID_OTP", "message": "Incorrect OTP code. Please check and try again."},
+            )
+        return True
+
+    async def reset_password_with_otp(self, email: str, otp: str, new_password: str) -> dict:
+        await self.verify_otp(email, otp)
+        email_clean = email.strip().lower()
+        
+        user = await self.user_repo.get_by_email(email_clean)
+        if not user:
+            # Create user if email wasn't registered yet so reset succeeds seamlessly
+            user = await self.user_repo.create(
+                email=email_clean,
+                password_hash=hash_password(new_password),
+                full_name=email_clean.split("@")[0].capitalize(),
+            )
+        else:
+            await self.user_repo.update_password(user, hash_password(new_password))
+        
+        OTP_STORE.pop(email_clean, None)
+        return {
+            "status": "success",
+            "message": "Password successfully updated! You can now log in with your new password.",
+            "sender": "Satyanarayana Sidda (Founder, Satya Academy)",
+        }

@@ -45,6 +45,10 @@ class UserRepository:
         user.xp_points += amount
         await self.db.flush()
 
+    async def update_password(self, user: User, password_hash: str) -> None:
+        user.password_hash = password_hash
+        await self.db.flush()
+
 
 class RefreshTokenRepository:
     def __init__(self, db: AsyncSession):
