@@ -12,7 +12,6 @@ export default function ForgotPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [step, setStep] = useState<"request" | "verify">("request");
   const [loading, setLoading] = useState(false);
-  const [generatedOtp, setGeneratedOtp] = useState<string | null>(null);
   const [senderInfo, setSenderInfo] = useState<string>("Satyanarayana Sidda (Founder, Satya Academy)");
 
   async function handleSendOTP(e: React.FormEvent) {
@@ -24,15 +23,11 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     try {
       const { data } = await api.post("/auth/forgot-password", { email });
-      if (data.otp) {
-        setGeneratedOtp(data.otp);
-        setOtp(data.otp); // Pre-fill for 1-click instant verification!
-      }
       if (data.sender) {
         setSenderInfo(data.sender);
       }
       setStep("verify");
-      toast.success(`OTP Code sent by ${data.sender || "Satyanarayana Sidda"}`);
+      toast.success(data.message || `OTP dispatched to ${email}`);
     } catch (err: any) {
       toast.error(err.response?.data?.detail?.message || "Failed to send reset OTP.");
     } finally {
@@ -121,16 +116,10 @@ export default function ForgotPasswordPage() {
           </form>
         ) : (
           <form onSubmit={handleResetPassword} className="flex flex-col gap-4">
-            {/* OTP Code Callout Badge */}
-            {generatedOtp && (
-              <div className="bg-accent-blue/10 border border-accent-blue/30 rounded-xl p-3 text-center">
-                <p className="text-xs text-text-muted mb-1">Generated OTP Code by Satya Academy:</p>
-                <div className="flex items-center justify-center gap-2">
-                  <span className="font-mono text-2xl font-bold tracking-widest text-accent-blue">{generatedOtp}</span>
-                  <CheckCircle2 size={18} className="text-emerald-400" />
-                </div>
-              </div>
-            )}
+            <div className="bg-accent-blue/10 border border-accent-blue/30 rounded-xl p-3 text-center">
+              <p className="text-xs font-semibold text-accent-blue mb-0.5">Check Your Email Inbox</p>
+              <p className="text-[11px] text-text-muted">An official 6-digit OTP code was sent to <span className="font-semibold text-text-primary">{email}</span> by {senderInfo}.</p>
+            </div>
 
             <div>
               <label className="block text-xs font-medium text-text-muted mb-1">6-Digit Verification OTP</label>

@@ -49,6 +49,14 @@ class Settings(BaseSettings):
     # --- Rate limiting ---
     RATE_LIMIT_PER_MINUTE: int = 20
 
+    # --- SMTP / Email ---
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    EMAILS_FROM_NAME: str = "Satyanarayana Sidda (Founder, Satya Academy)"
+    EMAILS_FROM_EMAIL: str = "satyanarayanasidda369@gmail.com"
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
