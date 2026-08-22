@@ -21,7 +21,14 @@ export default function QuizCenterPage() {
 
   const xpEarned = completedModules * 100;
 
-  const quizStats = JSON.parse(localStorage.getItem('quizStats') || '{"quizzesTaken": 0, "totalQuestions": 0, "totalCorrect": 0}');
+  const [quizStats, setQuizStats] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('quizStats') || '{"quizzesTaken": 0, "totalQuestions": 0, "totalCorrect": 0}');
+    } catch {
+      return { quizzesTaken: 0, totalQuestions: 0, totalCorrect: 0 };
+    }
+  });
+
   const quizzesTaken = quizStats.quizzesTaken;
   const accuracy = quizStats.totalQuestions > 0 ? Math.round((quizStats.totalCorrect / quizStats.totalQuestions) * 100) : 0;
 
@@ -48,11 +55,13 @@ export default function QuizCenterPage() {
       setSelectedOption(null);
     } else {
       const finalScore = score + (selectedOption === currentQuiz.questions[currentQuestionIndex].correct_answer ? 1 : 0);
-      const stats = JSON.parse(localStorage.getItem('quizStats') || '{"quizzesTaken": 0, "totalQuestions": 0, "totalCorrect": 0}');
-      stats.quizzesTaken += 1;
-      stats.totalQuestions += currentQuiz.questions.length;
-      stats.totalCorrect += finalScore;
-      localStorage.setItem('quizStats', JSON.stringify(stats));
+      const updated = {
+        quizzesTaken: (quizStats.quizzesTaken || 0) + 1,
+        totalQuestions: (quizStats.totalQuestions || 0) + currentQuiz.questions.length,
+        totalCorrect: (quizStats.totalCorrect || 0) + finalScore
+      };
+      localStorage.setItem('quizStats', JSON.stringify(updated));
+      setQuizStats(updated);
 
       alert(`Quiz finished! Score: ${finalScore}/${currentQuiz.questions.length}`);
       setCurrentQuiz(null);
