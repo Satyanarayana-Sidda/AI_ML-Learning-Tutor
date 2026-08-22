@@ -108,7 +108,7 @@ export default function AnalyticsPage() {
           <h1 className="font-display text-3xl font-semibold">Learning Analytics</h1>
           <p className="text-text-muted mt-1">Track your learning progress.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mr-28">
           <button onClick={handleShare} className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm transition-colors">
             <Share2 size={16} /> Share
           </button>

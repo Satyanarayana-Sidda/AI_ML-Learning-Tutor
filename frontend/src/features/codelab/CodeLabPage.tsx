@@ -34,7 +34,7 @@ export default function CodeLabPage() {
           </div>
           <h1 className="font-display text-xl font-semibold">Python Sandbox</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mr-28">
           <button 
             onClick={() => runMutation.mutate()}
             disabled={runMutation.isPending}
