@@ -1,5 +1,5 @@
 import { Play, Code2, BrainCircuit, Network, MessageSquare, Eye, Database, Sparkles, LineChart, HeartHandshake, FileText, Mic, Cpu, ThumbsUp, Smartphone, Terminal, Calculator, PieChart, BarChart, Server, Shield, Heart, TrendingUp, Cloud, Zap, Target, Atom, Search } from "lucide-react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/authStore";
@@ -47,17 +47,9 @@ export default function CoursesPage() {
   const navigate = useNavigate();
   const [activeTag, setActiveTag] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const { data: apiCourses, refetch } = useQuery({
+  const { data: apiCourses } = useQuery({
     queryKey: ['courses'],
     queryFn: async () => (await api.get('/courses')).data
-  });
-
-  const enrollMutation = useMutation({
-    mutationFn: async (courseId: string) => {
-      const { data } = await api.post(`/courses/${courseId}/enroll`);
-      return data;
-    },
-    onSuccess: () => refetch()
   });
 
   const savedProgress = useAuthStore((s) => s.courseProgress);

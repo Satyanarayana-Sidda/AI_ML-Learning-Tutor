@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UploadCloud, CheckCircle2, AlertCircle, FileText } from "lucide-react";
+import { CheckCircle2, AlertCircle, FileText } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 

@@ -7,8 +7,7 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { api } from "@/lib/api";
-import { SYLLABUS_DATA, Chapter } from "./moduleSyllabus";
+import { SYLLABUS_DATA } from "./moduleSyllabus";
 import { getOfflineChapterContent, getOfflineFlashcards } from "./staticContent";
 import FlashcardDeck from "./FlashcardDeck";
 import { useAuthStore } from "@/stores/authStore";
@@ -75,7 +74,7 @@ export default function ModuleViewerPage() {
 
     try {
       // Simulate API streaming for a premium UX without actually needing an API key!
-      const fullText = getOfflineChapterContent(moduleData.id, chapter.id, chapter.title, moduleData.title);
+      const fullText = getOfflineChapterContent(chapter.id, chapter.title, moduleData.title);
       
       // We chunk by words to simulate typing
       const tokens = fullText.split(/(?=[ \n])/);

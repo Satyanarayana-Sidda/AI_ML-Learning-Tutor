@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, Flame, Target, BookOpen, Clock, Activity, Code2, Award, CheckCircle2, Trophy, BookCheck } from "lucide-react";
+import { Flame, Target, Award, Trophy, BookCheck } from "lucide-react";
 import { api } from "@/lib/api";
 import TutorChat from "@/components/TutorChat";
 import { SYLLABUS_DATA } from "@/features/courses/moduleSyllabus";

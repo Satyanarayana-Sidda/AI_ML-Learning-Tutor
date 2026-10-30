@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { NavLink, Outlet, Link } from "react-router-dom";
-import toast from "react-hot-toast";
 import { 
-  LayoutDashboard, MessageSquare, FileText, BookOpen, LogOut, Sparkles,
-  Code2, CheckSquare, Map, Briefcase, FileSearch, Mic, LineChart, Trophy, Sun, Moon, Pencil, Bell, X, Check
+  LayoutDashboard, BookOpen, LogOut, Sparkles,
+  Code2, CheckSquare, Map, Briefcase, LineChart, Trophy, Sun, Moon, Pencil, Bell, X
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import TutorChat from "@/components/TutorChat";

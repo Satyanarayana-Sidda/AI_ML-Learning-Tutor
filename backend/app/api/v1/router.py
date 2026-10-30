@@ -1,6 +1,23 @@
 from fastapi import APIRouter
 
-from app.api.v1 import auth, conversations, dashboard, documents, paths, courses, codelab, quiz, roadmaps, projects, resume, interview, analytics, achievements, flashcards, sync
+from app.api.v1 import (
+    achievements,
+    analytics,
+    auth,
+    codelab,
+    conversations,
+    courses,
+    dashboard,
+    documents,
+    flashcards,
+    interview,
+    paths,
+    projects,
+    quiz,
+    resume,
+    roadmaps,
+    sync,
+)
 
 api_router = APIRouter()
 api_router.include_router(auth.router)

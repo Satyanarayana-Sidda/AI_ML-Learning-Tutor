@@ -1,4 +1,4 @@
-export function getOfflineChapterContent(moduleId: string, chapterId: string, chapterTitle: string, moduleTitle: string): string {
+export function getOfflineChapterContent(chapterId: string, chapterTitle: string, moduleTitle: string): string {
   // A robust dynamic template for all 30 courses (120+ chapters)
   const isAdvanced = chapterTitle.toLowerCase().includes('advanced') || chapterTitle.toLowerCase().includes('deep') || chapterId.includes('4') || chapterId.includes('10');
   

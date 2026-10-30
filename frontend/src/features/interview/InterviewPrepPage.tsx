@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mic, Pause, StopCircle, RefreshCw, Star, Play } from "lucide-react";
+import { RefreshCw, Star } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 

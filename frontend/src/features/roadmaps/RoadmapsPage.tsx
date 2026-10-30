@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Map, Rocket, BrainCircuit, Database, Settings, GitCommit, ChevronRight, CheckCircle2, Lock, ArrowRight, Play } from "lucide-react";
+import { Map, Rocket, BrainCircuit, Database, Settings, GitCommit, ArrowRight } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
@@ -14,8 +14,6 @@ export default function RoadmapsPage() {
   const [role, setRole] = useState("ML Engineer");
   const [level, setLevel] = useState("Intermediate");
   const [time, setTime] = useState("2 hours/day");
-  const [showGenerateModal, setShowGenerateModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'curated' | 'custom'>('curated');
   const savedProgress = useAuthStore((s) => s.courseProgress);
   const navigate = useNavigate();
 

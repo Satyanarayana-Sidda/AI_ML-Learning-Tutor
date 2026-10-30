@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Briefcase, ArrowRight, Code, Database, Globe } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 

@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { Activity, Clock, CheckCircle2, Target, Download, Share2, TrendingUp, TrendingDown, BookOpen } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { Activity, Clock, Target, Download, Share2, BookOpen } from "lucide-react";
 import { SYLLABUS_DATA } from "@/features/courses/moduleSyllabus";
 import { useAuthStore } from "@/stores/authStore";
 
