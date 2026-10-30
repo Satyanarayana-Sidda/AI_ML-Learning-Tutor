@@ -89,7 +89,12 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 @app.get("/health", tags=["health"])
 async def health_check():
-    return {"status": "ok", "env": settings.ENV}
+    return {
+        "status": "ok",
+        "env": settings.ENV,
+        "ai_configured": bool(settings.GEMINI_API_KEY),
+        "ai_model": settings.GEMINI_MODEL,
+    }
 
 
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
