@@ -35,7 +35,7 @@ api.interceptors.response.use(
 
       if (!refreshPromise) {
         refreshPromise = axios
-          .post("/api/v1/auth/refresh", { refresh_token: refreshToken })
+          .post(`${import.meta.env.VITE_API_URL || ""}/api/v1/auth/refresh`, { refresh_token: refreshToken })
           .then((res) => {
             const newAccessToken = res.data.access_token as string;
             useAuthStore.getState().setAccessToken(newAccessToken);
@@ -71,9 +71,9 @@ export async function streamChatMessage(
   onToken: (token: string) => void,
   onDone: (citations: unknown) => void
 ) {
-  const token = useAuthStore.getState().accessToken;
   const apiBaseUrl = import.meta.env.VITE_API_URL || "";
-  const response = await fetch(`${apiBaseUrl}/api/v1/conversations/${conversationId}/messages`, {
+  let token = useAuthStore.getState().accessToken;
+  let response = await fetch(`${apiBaseUrl}/api/v1/conversations/${conversationId}/messages`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -81,6 +81,25 @@ export async function streamChatMessage(
     },
     body: JSON.stringify({ content }),
   });
+
+  if (response.status === 401) {
+    const refreshToken = useAuthStore.getState().refreshToken;
+    if (refreshToken) {
+      const refreshResponse = await axios.post(`${apiBaseUrl}/api/v1/auth/refresh`, {
+        refresh_token: refreshToken,
+      });
+      token = refreshResponse.data.access_token as string;
+      useAuthStore.getState().setAccessToken(token);
+      response = await fetch(`${apiBaseUrl}/api/v1/conversations/${conversationId}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `******,
+        },
+        body: JSON.stringify({ content }),
+      });
+    }
+  }
 
   if (!response.ok) {
     const errorText = await response.text();

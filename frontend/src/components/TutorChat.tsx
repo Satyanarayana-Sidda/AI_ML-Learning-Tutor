@@ -150,8 +150,9 @@ export default function TutorChat({ inline = false }: { inline?: boolean }) {
         },
         () => setStreaming(false)
       );
-    } catch {
-      toast.error("The tutor couldn't respond. Please try again.");
+    } catch (error) {
+      console.error("Tutor chat request failed", error);
+      toast.error(error instanceof Error ? error.message : "The tutor couldn't respond. Please try again.");
       setStreaming(false);
     }
   }
