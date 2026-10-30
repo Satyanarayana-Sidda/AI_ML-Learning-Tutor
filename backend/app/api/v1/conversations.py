@@ -126,7 +126,15 @@ async def post_message(
         await db.commit()
         yield _sse({"done": True, "citations": citations})
 
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 def _sse(data: dict) -> str:

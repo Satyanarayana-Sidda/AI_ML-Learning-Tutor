@@ -87,7 +87,9 @@ export async function streamChatMessage(
     throw new Error(`Chat request failed (${response.status}): ${errorText}`);
   }
 
-  if (!response.body) return;
+  if (!response.body) {
+    throw new Error("Chat response did not contain a readable stream");
+  }
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
@@ -107,5 +109,12 @@ export async function streamChatMessage(
       if (json.done) onDone(json.citations);
       if (json.error) onToken(`\n\n_${json.error}_`);
     }
+  }
+
+  if (buffer.startsWith("data: ")) {
+    const json = JSON.parse(buffer.slice(6));
+    if (json.token) onToken(json.token);
+    if (json.done) onDone(json.citations);
+    if (json.error) onToken(`\n\n_${json.error}_`);
   }
 }
