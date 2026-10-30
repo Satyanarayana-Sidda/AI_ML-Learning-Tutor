@@ -4,6 +4,8 @@ A production-shaped AI/ML learning platform: streaming AI tutor, document-ground
 
 See [`docs/PHASE_1_ARCHITECTURE.md`](docs/PHASE_1_ARCHITECTURE.md) for the full system design, ER diagram, and API surface.
 
+https://aiml-tutor-web.onrender.com
+
 ## 🌟 Core Features
 
 - 🔐 **Authentication** — Secure JWT (access + refresh tokens), session management, and Google OAuth integration.
