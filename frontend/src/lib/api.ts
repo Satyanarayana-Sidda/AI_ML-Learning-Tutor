@@ -72,7 +72,8 @@ export async function streamChatMessage(
   onDone: (citations: unknown) => void
 ) {
   const token = useAuthStore.getState().accessToken;
-  const response = await fetch(`/api/v1/conversations/${conversationId}/messages`, {
+  const apiBaseUrl = import.meta.env.VITE_API_URL || "";
+  const response = await fetch(`${apiBaseUrl}/api/v1/conversations/${conversationId}/messages`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -80,6 +81,11 @@ export async function streamChatMessage(
     },
     body: JSON.stringify({ content }),
   });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Chat request failed (${response.status}): ${errorText}`);
+  }
 
   if (!response.body) return;
   const reader = response.body.getReader();
