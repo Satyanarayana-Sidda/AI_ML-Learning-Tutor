@@ -10,7 +10,6 @@ keeps "runs in-process for now" from becoming permanent tech debt.
 from app.core.database import AsyncSessionLocal
 from app.core.logging import get_logger
 from app.models.document import Document, DocumentChunk
-from app.services.rag_service import extract_text_from_file, get_rag_service
 
 logger = get_logger("ingestion_worker")
 
@@ -18,6 +17,8 @@ logger = get_logger("ingestion_worker")
 async def run_ingestion(document_id: str, storage_path: str, file_type: str) -> None:
     async with AsyncSessionLocal() as db:
         try:
+            from app.services.rag_service import extract_text_from_file, get_rag_service
+
             text = extract_text_from_file(storage_path, file_type)
             if not text.strip():
                 raise ValueError("no extractable text found in document")

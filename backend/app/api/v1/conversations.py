@@ -13,7 +13,6 @@ from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.document_repository import DocumentRepository
 from app.schemas.conversation import ConversationCreate, ConversationOut, MessageCreate, MessageOut
 from app.services.ai_service import AIService, get_ai_service
-from app.services.rag_service import RAGService, get_rag_service
 
 router = APIRouter(prefix="/conversations", tags=["ai-tutor"])
 logger = get_logger("conversations")
@@ -83,7 +82,6 @@ async def post_message(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
     ai_service: AIService = Depends(get_ai_service),
-    rag_service: RAGService = Depends(get_rag_service),
 ):
     """
     Streams the assistant's reply as Server-Sent Events. The frontend
@@ -107,6 +105,9 @@ async def post_message(
         yield _sse({"status": "started"})
         try:
             if convo.mode == "rag" and convo.document_id:
+                from app.services.rag_service import get_rag_service
+
+                rag_service = get_rag_service()
                 doc_repo = DocumentRepository(db)
                 document = await doc_repo.get_by_id(convo.document_id, current_user.id)
                 if not document or document.status != "ready":

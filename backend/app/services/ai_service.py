@@ -44,10 +44,9 @@ class AIService:
         chat = self._start_chat(history, TUTOR_SYSTEM_PROMPT)
         prompt = f"{TUTOR_SYSTEM_PROMPT}\n\nStudent: {user_message}" if not history else user_message
         try:
-            response = await chat.send_message_async(prompt, stream=True)
-            async for chunk in response:
-                if chunk.text:
-                    yield chunk.text
+            response = await chat.send_message_async(prompt)
+            if response.text:
+                yield response.text
         except Exception as exc:  # noqa: BLE001
             logger.error("gemini_stream_error", error=str(exc))
             if settings.GEMINI_API_KEY == "your_gemini_api_key_here":
@@ -63,10 +62,9 @@ class AIService:
             f"{RAG_SYSTEM_PROMPT}\n\nContext:\n{numbered_context}\n\nQuestion: {user_message}"
         )
         try:
-            response = await self.model.generate_content_async(prompt, stream=True)
-            async for chunk in response:
-                if chunk.text:
-                    yield chunk.text
+            response = await self.model.generate_content_async(prompt)
+            if response.text:
+                yield response.text
         except Exception as exc:  # noqa: BLE001
             logger.error("gemini_rag_stream_error", error=str(exc))
             if settings.GEMINI_API_KEY == "your_gemini_api_key_here":
