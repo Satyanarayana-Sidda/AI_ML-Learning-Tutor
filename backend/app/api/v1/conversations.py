@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
 from app.core.database import get_db
+from app.core.logging import get_logger
 from app.models.user import User
 from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.document_repository import DocumentRepository
@@ -15,6 +16,7 @@ from app.services.ai_service import AIService, get_ai_service
 from app.services.rag_service import RAGService, get_rag_service
 
 router = APIRouter(prefix="/conversations", tags=["ai-tutor"])
+logger = get_logger("conversations")
 
 
 @router.post("", response_model=ConversationOut)
@@ -100,31 +102,45 @@ async def post_message(
     async def event_generator():
         full_reply = ""
         citations = None
+        # Flush an event before contacting Gemini so hosted proxies do not
+        # treat a slow first token as a failed or idle request.
+        yield _sse({"status": "started"})
+        try:
+            if convo.mode == "rag" and convo.document_id:
+                doc_repo = DocumentRepository(db)
+                document = await doc_repo.get_by_id(convo.document_id, current_user.id)
+                if not document or document.status != "ready":
+                    yield _sse({"error": "Document is not ready yet. Please wait for processing to complete."})
+                    return
+                chunks = rag_service.query(str(convo.document_id), body.content)
+                citations = [{"excerpt": c[:200]} for c in chunks]
+                async for token in ai_service.stream_rag_reply(chunks, body.content):
+                    full_reply += token
+                    yield _sse({"token": token})
+            else:
+                history = await convo_repo.get_messages(conversation_id)
+                gemini_history = [
+                    {"role": "user" if m.role == "user" else "model", "parts": [m.content]}
+                    for m in history[:-1]
+                ]
+                async for token in ai_service.stream_tutor_reply(gemini_history, body.content):
+                    full_reply += token
+                    yield _sse({"token": token})
 
-        if convo.mode == "rag" and convo.document_id:
-            doc_repo = DocumentRepository(db)
-            document = await doc_repo.get_by_id(convo.document_id, current_user.id)
-            if not document or document.status != "ready":
-                yield _sse({"error": "Document is not ready yet. Please wait for processing to complete."})
-                return
-            chunks = rag_service.query(str(convo.document_id), body.content)
-            citations = [{"excerpt": c[:200]} for c in chunks]
-            async for token in ai_service.stream_rag_reply(chunks, body.content):
-                full_reply += token
-                yield _sse({"token": token})
-        else:
-            history = await convo_repo.get_messages(conversation_id)
-            gemini_history = [
-                {"role": "user" if m.role == "user" else "model", "parts": [m.content]}
-                for m in history[:-1]  # exclude the message we just added; passed separately
-            ]
-            async for token in ai_service.stream_tutor_reply(gemini_history, body.content):
-                full_reply += token
-                yield _sse({"token": token})
-
-        await convo_repo.add_message(conversation_id, role="assistant", content=full_reply, citations=citations)
-        await db.commit()
-        yield _sse({"done": True, "citations": citations})
+            await convo_repo.add_message(
+                conversation_id, role="assistant", content=full_reply, citations=citations
+            )
+            await db.commit()
+            yield _sse({"done": True, "citations": citations})
+        except Exception as exc:
+            logger.error(
+                "conversation_stream_error",
+                conversation_id=str(conversation_id),
+                error=str(exc),
+            )
+            await db.rollback()
+            yield _sse({"error": "The tutor could not generate a response. Please try again."})
+            yield _sse({"done": True, "citations": citations})
 
     return StreamingResponse(
         event_generator(),

@@ -107,10 +107,19 @@ export async function streamChatMessage(
 
   const processEvent = (part: string) => {
     if (!part.startsWith("data: ")) return;
-    const json = JSON.parse(part.slice(6));
-    if (json.token) onToken(json.token);
-    if (json.done) onDone(json.citations);
-    if (json.error) onToken(`\n\n_${json.error}_`);
+    try {
+      const json = JSON.parse(part.slice(6));
+      if (json.token) onToken(json.token);
+      if (json.error) {
+        onToken(`\n\n_${json.error}_`);
+        onDone(json.citations);
+      } else if (json.done) {
+        onDone(json.citations);
+      }
+    } catch (error) {
+      console.error("Invalid chat stream event", error);
+      onDone(undefined);
+    }
   };
 
   while (true) {
